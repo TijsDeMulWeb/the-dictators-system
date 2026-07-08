@@ -1,0 +1,17 @@
+{
+  "name": "the-dictators-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Discord bot front-end for The Dictators System (talks to the Laravel backend).",
+  "scripts": {
+    "start": "node src/index.js",
+    "deploy": "node src/deploy-commands.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.7",
+    "puppeteer": "^23.11.1"
+  }
+}
