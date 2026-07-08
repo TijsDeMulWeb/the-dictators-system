@@ -88,7 +88,10 @@ class ReportService
 
     public function nextReportNumber(): int
     {
-        return (int) Report::query()->max('report_number') + 1;
+        $afterHighest = (int) Report::query()->max('report_number') + 1;
+        $configuredStart = (int) config('discord.report_start_number', 1);
+
+        return max($afterHighest, $configuredStart);
     }
 
     /**

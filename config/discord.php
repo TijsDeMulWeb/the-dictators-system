@@ -34,4 +34,14 @@ return [
     | API (routes/api.php, protected by the bot.auth middleware).
     */
     'internal_api_secret' => env('INTERNAL_API_SECRET'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Report numbering
+    |--------------------------------------------------------------------------
+    |
+    | The first report will use this number (e.g. continue your existing series
+    | at 576). Once reports exist, numbering continues from the highest + 1.
+    */
+    'report_start_number' => (int) env('REPORT_START_NUMBER', 1),
 ];

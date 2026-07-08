@@ -70,6 +70,31 @@ it('creates a pending report with per-player points and a sequential number', fu
     expect($report->players()->where('discord_id', 'P2')->first()->pivot->points)->toBe(1300);
 });
 
+it('starts numbering at the configured start number', function () {
+    config()->set('discord.report_start_number', 576);
+    Player::factory()->create(['discord_id' => 'L1']);
+
+    $this->withHeaders(botHeaders())
+        ->postJson('/api/reports', [
+            'leader_discord_id' => 'L1',
+            'result' => 'win',
+            'players' => [['discord_id' => 'L1', 'points' => 500]],
+        ])
+        ->assertCreated()
+        ->assertJsonPath('data.report_number', 576);
+
+    // The next report continues from there.
+    Player::factory()->create(['discord_id' => 'L2']);
+    $this->withHeaders(botHeaders())
+        ->postJson('/api/reports', [
+            'leader_discord_id' => 'L2',
+            'result' => 'win',
+            'players' => [['discord_id' => 'L2', 'points' => 500]],
+        ])
+        ->assertCreated()
+        ->assertJsonPath('data.report_number', 577);
+});
+
 it('rounds submitted points to the nearest 50', function () {
     Player::factory()->create(['discord_id' => 'L1']);
 
