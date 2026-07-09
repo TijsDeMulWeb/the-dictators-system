@@ -70,6 +70,13 @@ export async function handleApprove(interaction, reportId) {
 
   await approveReport(reportId, interaction.user.id, posted.id).catch(() => {});
 
+  // Game is done and approved -> clean up its channel.
+  if (report.game_channel_id) {
+    await interaction.guild?.channels
+      ?.delete(report.game_channel_id, `Game #${report.report_number} approved`)
+      .catch(() => {});
+  }
+
   await finalizeReviewMessage(interaction, 'approved', `<@${interaction.user.id}>`);
   await interaction.editReply(`✅ Report #${report.report_number} approved and posted to <#${config.reportChannelId}>.`);
 }

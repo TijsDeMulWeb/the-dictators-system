@@ -83,6 +83,16 @@ class Report extends Model
     }
 
     /**
+     * The played game (named to avoid clashing with the `game` map column).
+     *
+     * @return BelongsTo<Game, $this>
+     */
+    public function gameSession(): BelongsTo
+    {
+        return $this->belongsTo(Game::class, 'game_id');
+    }
+
+    /**
      * @return BelongsToMany<Player, $this>
      */
     public function players(): BelongsToMany

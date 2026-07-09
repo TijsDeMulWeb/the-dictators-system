@@ -64,7 +64,7 @@ class ReportController extends Controller
             $report->update(['posted_message_id' => $validated['posted_message_id']]);
         }
 
-        return ReportResource::make($report->load(['leader', 'players', 'challenge']));
+        return ReportResource::make($report->load(['leader', 'players', 'challenge', 'gameSession']));
     }
 
     public function reject(Request $request, Report $report): ReportResource

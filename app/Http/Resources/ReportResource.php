@@ -30,6 +30,8 @@ class ReportResource extends JsonResource
                 'tier' => $this->challenge->tier,
             ] : null,
             'challenge_bonus' => $this->challenge_bonus,
+            'game_id' => $this->game_id,
+            'game_channel_id' => $this->gameSession?->channel_id,
             'leader' => [
                 'discord_id' => $this->leader->discord_id,
                 'display_name' => $this->leader->display_name,
