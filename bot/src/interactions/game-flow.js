@@ -78,8 +78,29 @@ export async function handleGameContinue(interaction, token) {
 
   const mentions = players.map((p) => `<@${p.discord_id}>`).join(' ');
   await channel
-    .send(`🎮 **Game #${game.number}** — ${mentions}\nGood luck! When the game is done, run \`/report\` here.`)
+    .send(
+      `🎮 **Game #${game.number}** — ${mentions}\nVote for the continent (or a challenge) below. When the game is done, run \`/report\` here.`,
+    )
     .catch(() => {});
+
+  // Continent / challenge vote (text poll with number reactions).
+  const pollMessage = await channel
+    .send(
+      '**Lets vote for continent**\n\n' +
+        '1️⃣ Europe\n' +
+        '2️⃣ Asia\n' +
+        '3️⃣ America\n' +
+        '4️⃣ Africa\n' +
+        '5️⃣ Challenge\n\n' +
+        '_Vote by clicking a number below._',
+    )
+    .catch(() => null);
+
+  if (pollMessage) {
+    for (const emoji of ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣']) {
+      await pollMessage.react(emoji).catch(() => {});
+    }
+  }
 
   deleteDraft(token);
   await interaction.editReply(`✅ Game **#${game.number}** created: ${channel}`);
@@ -90,7 +111,12 @@ export async function handleGameContinue(interaction, token) {
  * the creator and the bot.
  */
 function buildOverwrites(interaction, players, creatorId) {
-  const allow = [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages];
+  const allow = [
+    PermissionFlagsBits.ViewChannel,
+    PermissionFlagsBits.SendMessages,
+    PermissionFlagsBits.AddReactions,
+    PermissionFlagsBits.ReadMessageHistory,
+  ];
 
   const overwrites = [
     { id: interaction.guild.roles.everyone.id, deny: [PermissionFlagsBits.ViewChannel] },
