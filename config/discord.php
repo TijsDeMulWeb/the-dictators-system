@@ -44,4 +44,14 @@ return [
     | at 576). Once reports exist, numbering continues from the highest + 1.
     */
     'report_start_number' => (int) env('REPORT_START_NUMBER', 1),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Personal win threshold
+    |--------------------------------------------------------------------------
+    |
+    | In a won game, a player only gets a personal win if they scored at least
+    | this many game points; below it, the game counts as a personal loss.
+    */
+    'win_points_threshold' => (int) env('WIN_POINTS_THRESHOLD', 500),
 ];

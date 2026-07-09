@@ -19,6 +19,25 @@ function seedGames(Player $player, int $games, int $wins, int $pointsPerGame): v
     }
 }
 
+it('counts a won game as a personal loss when the player scored under 500', function () {
+    $player = Player::factory()->create(['display_name' => 'Underperformer']);
+
+    // Won game but only 300 points -> personal loss.
+    $lowWin = Report::factory()->approved()->win()->for($player, 'leader')->create();
+    $lowWin->players()->attach($player, ['points' => 300]);
+
+    // Won game with 500 points -> personal win (threshold is inclusive).
+    $goodWin = Report::factory()->approved()->win()->for($player, 'leader')->create();
+    $goodWin->players()->attach($player, ['points' => 500]);
+
+    $row = (new ScoreboardService)->build()->firstWhere('player_id', $player->id);
+
+    expect($row['games'])->toBe(2);
+    expect($row['wins'])->toBe(1);
+    expect($row['losses'])->toBe(1);
+    expect($row['win_rate'])->toBe(0.5);
+});
+
 it('computes the final score using the natural-log volume formula', function () {
     $service = new ScoreboardService;
 

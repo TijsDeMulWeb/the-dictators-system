@@ -46,7 +46,15 @@ class ScoreboardService
                     return null;
                 }
 
-                $wins = $reports->where('result', ReportResult::Win)->count();
+                // A game only counts as a personal win if the team won AND the
+                // player scored at least the win threshold (game points, before
+                // any challenge bonus). Otherwise it's a personal loss.
+                $threshold = (int) config('discord.win_points_threshold', 500);
+
+                $wins = $reports->filter(
+                    fn ($report) => $report->result === ReportResult::Win
+                        && (int) $report->pivot->points >= $threshold
+                )->count();
                 $losses = $games - $wins;
 
                 // Each participant's points for a game include the challenge
