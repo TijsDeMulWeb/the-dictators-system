@@ -74,9 +74,10 @@ class ReportController extends Controller
             'note' => ['nullable', 'string'],
         ]);
 
+        // The report is discarded on reject; relations are already loaded.
         $report = $this->reports->reject($report, $validated['reviewer_discord_id'], $validated['note'] ?? null);
 
-        return ReportResource::make($report->load(['leader', 'players', 'challenge']));
+        return ReportResource::make($report);
     }
 
     /**

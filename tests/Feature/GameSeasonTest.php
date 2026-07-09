@@ -74,6 +74,33 @@ it('creates a game report using the game number and season, once per game', func
     ]))->toThrow(ValidationException::class);
 });
 
+it('discards a report on reject so the game can be reported again', function () {
+    Player::factory()->create(['discord_id' => 'P1']);
+    $game = app(GameService::class)->create(['P1'], 'P1');
+    $service = app(ReportService::class);
+
+    $report = $service->createFromBot([
+        'leader_discord_id' => 'P1',
+        'game_id' => $game->id,
+        'result' => 'win',
+        'players' => [['discord_id' => 'P1', 'points' => 1000]],
+    ]);
+    $id = $report->id;
+
+    $service->reject($report, 'SEC', 'not valid');
+    expect(Report::find($id))->toBeNull();
+
+    // The same game can now be reported again with the same number.
+    $again = $service->createFromBot([
+        'leader_discord_id' => 'P1',
+        'game_id' => $game->id,
+        'result' => 'win',
+        'players' => [['discord_id' => 'P1', 'points' => 1200]],
+    ]);
+
+    expect($again->report_number)->toBe(576);
+});
+
 it('scores only the active season', function () {
     $player = Player::factory()->create(['display_name' => 'P']);
 

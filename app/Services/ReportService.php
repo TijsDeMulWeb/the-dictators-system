@@ -88,16 +88,23 @@ class ReportService
         return $report;
     }
 
+    /**
+     * Reject a report by discarding it, so the game can be reported again with
+     * the same number. The audit trail lives in the Discord review message.
+     */
     public function reject(Report $report, string $reviewerDiscordId, ?string $note = null): Report
     {
         $this->assertPending($report);
 
-        $report->update([
+        $report->load(['leader', 'players', 'challenge']);
+        $report->fill([
             'status' => ReportStatus::Rejected,
             'reviewed_by_discord_id' => $reviewerDiscordId,
             'review_note' => $note,
             'reviewed_at' => now(),
         ]);
+
+        $report->delete();
 
         return $report;
     }
