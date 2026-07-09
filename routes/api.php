@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Api\ChallengeController;
+use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\PlayerController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ScoreboardController;
+use App\Http\Controllers\Api\SeasonController;
 use App\Http\Controllers\Api\TierController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,4 +29,12 @@ Route::middleware('bot.auth')->group(function () {
     Route::get('tiers', [TierController::class, 'index']);
     Route::post('tiers', [TierController::class, 'store']);
     Route::delete('tiers/{tier}', [TierController::class, 'destroy']);
+
+    Route::post('games', [GameController::class, 'store']);
+    Route::post('games/{game}/channel', [GameController::class, 'setChannel']);
+    Route::get('games/by-channel', [GameController::class, 'byChannel']);
+
+    Route::get('seasons/active', [SeasonController::class, 'active']);
+    Route::post('seasons/new', [SeasonController::class, 'startNew']);
+    Route::post('seasons/current-number', [SeasonController::class, 'setCurrentNumber']);
 });

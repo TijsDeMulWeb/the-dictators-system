@@ -23,6 +23,7 @@ class ReportController extends Controller
     {
         $validated = $request->validate([
             'leader_discord_id' => ['required', 'string'],
+            'game_id' => ['nullable', 'integer', 'exists:games,id'],
             'game' => ['nullable', 'string'],
             'day' => ['nullable', 'integer', 'min:0'],
             'challenge_id' => ['nullable', 'integer', 'exists:challenges,id'],

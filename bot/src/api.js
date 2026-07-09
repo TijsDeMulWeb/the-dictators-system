@@ -65,6 +65,39 @@ export async function fetchTiers() {
   return data.data;
 }
 
+export async function createGame(playerDiscordIds, createdByDiscordId) {
+  const { data } = await api.post('/games', {
+    player_discord_ids: playerDiscordIds,
+    created_by_discord_id: createdByDiscordId,
+  });
+  return data.data;
+}
+
+export async function setGameChannel(gameId, channelId) {
+  const { data } = await api.post(`/games/${gameId}/channel`, { channel_id: channelId });
+  return data.data;
+}
+
+export async function getGameByChannel(channelId) {
+  const { data } = await api.get('/games/by-channel', { params: { channel_id: channelId } });
+  return data.data;
+}
+
+export async function getActiveSeason() {
+  const { data } = await api.get('/seasons/active');
+  return data.data;
+}
+
+export async function startNewSeason() {
+  const { data } = await api.post('/seasons/new');
+  return data.data;
+}
+
+export async function setCurrentGameNumber(number) {
+  const { data } = await api.post('/seasons/current-number', { number });
+  return data.data;
+}
+
 export async function addTier(name, points) {
   const { data } = await api.post('/tiers', { name, points });
   return data.data;

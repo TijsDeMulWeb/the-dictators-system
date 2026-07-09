@@ -46,7 +46,7 @@
 </head>
 <body>
     <div id="board">
-        <h1>{{ $title ?? 'The Dictators — Scoreboard' }}</h1>
+        <h1>{{ $title ?? 'The Dictators — Scoreboard' }}@isset($season) · Season {{ $season }}@endisset</h1>
         <div class="subtitle">
             Final Score = Avg Points × (ln(Games + 1))² × Win Rate ·
             {{ now()->format('d M Y H:i') }}

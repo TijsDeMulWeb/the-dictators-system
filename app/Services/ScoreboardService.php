@@ -28,12 +28,15 @@ class ScoreboardService
      *     rank: int
      * }>
      */
-    public function build(bool $includeRetired = true): Collection
+    public function build(bool $includeRetired = true, ?int $seasonId = null): Collection
     {
+        $seasonId ??= app(SeasonService::class)->active()->id;
+
         $players = Player::query()
             ->when(! $includeRetired, fn ($query) => $query->where('is_retired', false))
-            ->with(['reports' => function ($query) {
-                $query->where('reports.status', ReportStatus::Approved->value);
+            ->with(['reports' => function ($query) use ($seasonId) {
+                $query->where('reports.status', ReportStatus::Approved->value)
+                    ->where('reports.season_id', $seasonId);
             }])
             ->get();
 

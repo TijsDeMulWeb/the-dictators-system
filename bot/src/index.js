@@ -4,12 +4,12 @@ import { commandMap } from './commands/index.js';
 import { mapMember, syncGuildPlayers } from './lib/players.js';
 import { deactivatePlayer, upsertPlayers } from './api.js';
 import { closeBrowser } from './render.js';
+import { handleModalSubmit } from './interactions/report-flow.js';
 import {
-  handleCancel,
-  handleContinue,
-  handleModalSubmit,
-  handleUserSelect,
-} from './interactions/report-flow.js';
+  handleGameCancel,
+  handleGameContinue,
+  handleGameUserSelect,
+} from './interactions/game-flow.js';
 import {
   handleApprove,
   handleRejectButton,
@@ -78,10 +78,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
       return;
     }
 
-    const [domain, action, token, extra] = (interaction.customId ?? '').split(':');
+    const [domain, action, token] = (interaction.customId ?? '').split(':');
 
     if (domain === 'report') {
-      await routeReport(interaction, action, token, extra);
+      if (action === 'modal') {
+        await handleModalSubmit(interaction, token);
+      }
+      return;
+    }
+
+    if (domain === 'newgame') {
+      await routeNewGame(interaction, action, token);
       return;
     }
 
@@ -94,16 +101,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
-async function routeReport(interaction, action, token) {
+async function routeNewGame(interaction, action, token) {
   switch (action) {
     case 'users':
-      return handleUserSelect(interaction, token);
+      return handleGameUserSelect(interaction, token);
     case 'continue':
-      return handleContinue(interaction, token);
+      return handleGameContinue(interaction, token);
     case 'cancel':
-      return handleCancel(interaction, token);
-    case 'modal':
-      return handleModalSubmit(interaction, token);
+      return handleGameCancel(interaction, token);
   }
 }
 

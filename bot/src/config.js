@@ -26,6 +26,7 @@ export const config = {
   secretaryRoleId: required('DISCORD_SECRETARY_ROLE_ID'),
   leaderRoleId: required('DISCORD_LEADER_ROLE_ID'),
   retiredRoleId: required('DISCORD_RETIRED_ROLE_ID'),
+  gameCategoryId: required('DISCORD_GAME_CATEGORY_ID'),
   apiUrl: (process.env.LARAVEL_API_URL || 'http://localhost:8000').replace(/\/$/, ''),
   apiSecret: required('INTERNAL_API_SECRET'),
 };

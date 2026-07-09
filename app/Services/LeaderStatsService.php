@@ -22,11 +22,14 @@ class LeaderStatsService
      *     rank: int
      * }>
      */
-    public function build(): Collection
+    public function build(?int $seasonId = null): Collection
     {
+        $seasonId ??= app(SeasonService::class)->active()->id;
+
         return Player::query()
-            ->with(['ledReports' => function ($query) {
-                $query->where('status', ReportStatus::Approved->value);
+            ->with(['ledReports' => function ($query) use ($seasonId) {
+                $query->where('status', ReportStatus::Approved->value)
+                    ->where('season_id', $seasonId);
             }])
             ->get()
             ->map(function (Player $leader) {

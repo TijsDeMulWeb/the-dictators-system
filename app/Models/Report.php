@@ -16,6 +16,8 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int $report_number
+ * @property int|null $season_id
+ * @property int|null $game_id
  * @property string $game
  * @property int|null $day
  * @property int|null $challenge_id
@@ -34,7 +36,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  */
 #[Fillable([
-    'report_number', 'game', 'day', 'challenge_id', 'challenge_bonus', 'leader_id', 'result',
+    'report_number', 'season_id', 'game_id', 'game', 'day', 'challenge_id', 'challenge_bonus', 'leader_id', 'result',
     'ingame_screenshot_path', 'report_image_path', 'status',
     'review_message_id', 'posted_message_id', 'reviewed_by_discord_id',
     'review_note', 'reviewed_at',
@@ -70,6 +72,14 @@ class Report extends Model
     public function challenge(): BelongsTo
     {
         return $this->belongsTo(Challenge::class);
+    }
+
+    /**
+     * @return BelongsTo<Season, $this>
+     */
+    public function season(): BelongsTo
+    {
+        return $this->belongsTo(Season::class);
     }
 
     /**

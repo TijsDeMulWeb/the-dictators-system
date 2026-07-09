@@ -43,7 +43,7 @@
 </head>
 <body>
     <div id="board">
-        <h1>Games per Leader</h1>
+        <h1>Games per Leader@isset($season) · Season {{ $season }}@endisset</h1>
 
         <table>
             <thead>

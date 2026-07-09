@@ -71,6 +71,7 @@ cd bot && npm run deploy      # re-run whenever a command's definition changes
 | `DISCORD_SECRETARY_ROLE_ID` | Role allowed to review/manage |
 | `DISCORD_LEADER_ROLE_ID` | Role allowed to submit reports |
 | `DISCORD_RETIRED_ROLE_ID` | Members with this role are excluded from selection |
+| `DISCORD_GAME_CATEGORY_ID` | Category the `❌-game-<n>` channels are created under |
 | `INTERNAL_API_SECRET` | Shared secret between the bot and Laravel |
 | `LARAVEL_API_URL` | Base URL the bot uses to reach Laravel (default `http://localhost:8000`) |
 
@@ -103,14 +104,23 @@ php artisan route:cache
 
 | Command | Who | What |
 | --- | --- | --- |
-| `/report` | Leader / Secretary | Submit a game report (searchable player picker, optional challenge) |
-| `/scoreboard` | Secretary | Render & post the scoreboard image |
-| `/leaders` | Secretary | Post the "games per leader" list (copyable image) |
+| `/new-game` | Leader / Secretary | Pick players and create a private `❌-game-<n>` channel |
+| `/report` | Leader / Secretary | Submit the report **inside a game channel** (number + players auto-detected) |
+| `/new-season` | Secretary | Start the next 100-block season and reset the standings |
+| `/set-current-game` | Secretary | Set the next game number |
+| `/scoreboard` | Secretary | Render & post the scoreboard image (current season) |
+| `/leaders` | Secretary | Post the "games per leader" list (current season) |
 | `/challenges` | Everyone | List the available challenges |
 | `/challenge-add` · `/challenge-remove` | Secretary | Manage challenges |
 | `/tier-list` | Everyone | List tiers and their bonus points |
 | `/tier-add` · `/tier-remove` | Secretary | Manage tiers |
 | `/sync-players` | Secretary | Force a full re-sync of the member list |
+
+Games are numbered per **season** (blocks of 100, e.g. 500–599). Each game gets a
+number; `/report` inside that game's channel produces a report with the same
+number. When a season fills up, the secretary runs `/new-season` for the next
+block, which resets the scoreboard. The bot needs the **Manage Channels**
+permission to create game channels.
 
 Players are synced automatically on startup and as members join, leave, or change
 name/roles.

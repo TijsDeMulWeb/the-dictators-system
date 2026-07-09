@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\ReportResult;
 use App\Enums\ReportStatus;
 use App\Models\Challenge;
+use App\Models\Game;
 use App\Models\Player;
 use App\Models\Report;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,7 @@ class ReportService
      *
      * @param  array{
      *     leader_discord_id: string,
+     *     game_id?: int|null,
      *     game?: string,
      *     day?: int|null,
      *     challenge_id?: int|null,
@@ -34,8 +36,22 @@ class ReportService
                 ? Challenge::query()->findOrFail($data['challenge_id'])
                 : null;
 
+            // When the report is tied to a game, the report number and season
+            // come from that game (one report per game).
+            $game = ! empty($data['game_id'])
+                ? Game::query()->findOrFail($data['game_id'])
+                : null;
+
+            if ($game && $game->report()->exists()) {
+                throw ValidationException::withMessages([
+                    'game' => "Game #{$game->number} already has a report.",
+                ]);
+            }
+
             $report = Report::query()->create([
-                'report_number' => $this->nextReportNumber(),
+                'report_number' => $game?->number ?? $this->nextReportNumber(),
+                'season_id' => $game?->season_id ?? app(SeasonService::class)->active()->id,
+                'game_id' => $game?->id,
                 'game' => $data['game'] ?? 'Asia',
                 'day' => $data['day'] ?? null,
                 'challenge_id' => $challenge?->id,

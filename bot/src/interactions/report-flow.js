@@ -10,82 +10,18 @@ import {
 } from 'discord.js';
 import { config } from '../config.js';
 import { createReport, upsertPlayers } from '../api.js';
-import { deleteDraft, getDraft, updateDraft } from '../session.js';
+import { deleteDraft, getDraft } from '../session.js';
 import { renderReportCard } from '../render.js';
 import { reviewEmbed } from '../lib/embeds.js';
 import { fetchImageBuffer } from '../lib/http.js';
 
 /**
- * Players were picked in the (searchable) user select menu. Keep the non-bot,
- * non-retired members and remember them on the draft.
+ * Build the points modal, pre-filled with the game's players.
  */
-export async function handleUserSelect(interaction, token) {
-  const draft = getDraft(token);
-  if (!draft) {
-    await expired(interaction);
-    return;
-  }
-
-  const kept = [];
-  let droppedRetired = 0;
-
-  for (const userId of interaction.values) {
-    const user = interaction.users.get(userId);
-    const member = interaction.members.get(userId);
-
-    if (user?.bot) {
-      continue;
-    }
-    if (memberHasRole(member, config.retiredRoleId)) {
-      droppedRetired += 1;
-      continue;
-    }
-
-    kept.push({
-      discord_id: userId,
-      display_name: displayNameOf(member, user),
-      username: user?.username ?? 'unknown',
-      avatar_url: user?.displayAvatarURL?.({ size: 128 }) ?? null,
-      is_retired: false,
-    });
-  }
-
-  updateDraft(token, { selectedPlayers: kept, droppedRetired });
-
-  await interaction.deferUpdate();
-}
-
-export async function handleCancel(interaction, token) {
-  deleteDraft(token);
-  await interaction.update({ content: '🗑️ Report cancelled.', components: [] });
-}
-
-/**
- * Continue pressed: open the points modal for the picked players.
- */
-export async function handleContinue(interaction, token) {
-  const draft = getDraft(token);
-  if (!draft) {
-    await expired(interaction);
-    return;
-  }
-
-  const selectedPlayers = draft.selectedPlayers ?? [];
-
-  if (selectedPlayers.length === 0) {
-    await interaction.reply({
-      content: draft.droppedRetired
-        ? '❌ Everyone you picked is Retired. Pick at least one active player.'
-        : '❌ Pick at least one player before continuing.',
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
-
-  const title = `Report — ${draft.result === 'win' ? 'Win' : 'Loss'}`;
+export function buildPointsModal(token, title, selectedPlayers) {
   const prefill = selectedPlayers.map((p) => `${p.display_name} | | `).join('\n');
 
-  const modal = new ModalBuilder()
+  return new ModalBuilder()
     .setCustomId(`report:modal:${token}`)
     .setTitle(title)
     .addComponents(
@@ -99,8 +35,6 @@ export async function handleContinue(interaction, token) {
           .setRequired(true),
       ),
     );
-
-  await interaction.showModal(modal);
 }
 
 /**
@@ -122,8 +56,8 @@ export async function handleModalSubmit(interaction, token) {
     return;
   }
 
-  // Safety net: make sure every picked player (and the leader) exists in the DB
-  // before the report references them, in case they were not synced yet.
+  // Safety net: make sure every player (and the leader) exists in the DB before
+  // the report references them, in case they were not synced yet.
   const leaderMember = interaction.member;
   const toUpsert = [...draft.selectedPlayers];
   if (leaderMember && ! toUpsert.some((p) => p.discord_id === draft.leaderId)) {
@@ -141,6 +75,7 @@ export async function handleModalSubmit(interaction, token) {
   try {
     report = await createReport({
       leader_discord_id: draft.leaderId,
+      game_id: draft.gameId,
       game: draft.game,
       day: draft.day,
       challenge_id: draft.challengeId,
@@ -214,28 +149,7 @@ function parseEntries(raw, selectedPlayers) {
     .filter(Boolean);
 }
 
-/**
- * Whether a selected member has the given role. Handles both the full
- * GuildMember shape (roles.cache) and the resolved API shape (roles array).
- */
-function memberHasRole(member, roleId) {
-  if (!member) {
-    return false;
-  }
-  if (member.roles?.cache) {
-    return member.roles.cache.has(roleId);
-  }
-  if (Array.isArray(member.roles)) {
-    return member.roles.includes(roleId);
-  }
-  return false;
-}
-
-function displayNameOf(member, user) {
-  return member?.displayName ?? member?.nick ?? user?.globalName ?? user?.username ?? 'Unknown';
-}
-
-function apiError(error) {
+export function apiError(error) {
   return error?.response?.data?.message ?? error.message ?? 'unknown error';
 }
 

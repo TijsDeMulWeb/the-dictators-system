@@ -6,6 +6,7 @@ use App\Enums\ReportResult;
 use App\Enums\ReportStatus;
 use App\Models\Player;
 use App\Models\Report;
+use App\Models\Season;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,6 +21,7 @@ class ReportFactory extends Factory
     {
         return [
             'report_number' => fake()->unique()->numberBetween(1, 999999),
+            'season_id' => fn () => Season::query()->where('is_active', true)->value('id'),
             'game' => 'Asia',
             'day' => fake()->numberBetween(1, 60),
             'leader_id' => Player::factory(),
