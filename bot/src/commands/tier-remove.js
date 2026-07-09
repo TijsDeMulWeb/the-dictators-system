@@ -1,5 +1,6 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
 import { config } from '../config.js';
+import { isSecretary } from '../lib/members.js';
 import { fetchTiers, removeTier } from '../api.js';
 
 export const data = new SlashCommandBuilder()
@@ -26,7 +27,7 @@ export async function autocomplete(interaction) {
 }
 
 export async function execute(interaction) {
-  if (!interaction.member?.roles?.cache?.has(config.secretaryRoleId)) {
+  if (!isSecretary(interaction)) {
     await interaction.reply({
       content: '⛔ Only the General Secretary can manage tiers.',
       flags: MessageFlags.Ephemeral,

@@ -1,8 +1,8 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
-import { config } from '../config.js';
 import { fetchChallenges, getGameByChannel } from '../api.js';
 import { createDraft } from '../session.js';
 import { buildPointsModal } from '../interactions/report-flow.js';
+import { isLeaderOrSecretary } from '../lib/members.js';
 
 export const data = new SlashCommandBuilder()
   .setName('report')
@@ -43,8 +43,7 @@ export async function autocomplete(interaction) {
 }
 
 export async function execute(interaction) {
-  const roles = interaction.member?.roles?.cache;
-  if (! (roles?.has(config.leaderRoleId) || roles?.has(config.secretaryRoleId))) {
+  if (! isLeaderOrSecretary(interaction)) {
     await interaction.reply({
       content: '⛔ Only Leaders (or the General Secretary) can submit reports.',
       flags: MessageFlags.Ephemeral,

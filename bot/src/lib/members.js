@@ -1,18 +1,42 @@
+import { config } from '../config.js';
+
 /**
- * Whether a selected member has the given role. Handles both the full
- * GuildMember shape (roles.cache) and the resolved API shape (roles array).
+ * Whether a member has the given role. Prefers the raw role-id list
+ * (member._roles on a GuildMember, or member.roles on a resolved API member)
+ * because roles.cache depends on the guild's roles being cached, which is not
+ * guaranteed and silently drops roles.
  */
 export function memberHasRole(member, roleId) {
   if (!member) {
     return false;
   }
-  if (member.roles?.cache) {
-    return member.roles.cache.has(roleId);
+  if (Array.isArray(member._roles)) {
+    return member._roles.includes(roleId);
   }
   if (Array.isArray(member.roles)) {
     return member.roles.includes(roleId);
   }
+  if (member.roles?.cache) {
+    return member.roles.cache.has(roleId);
+  }
   return false;
+}
+
+/**
+ * Whether the interaction's member is the General Secretary.
+ */
+export function isSecretary(interaction) {
+  return memberHasRole(interaction.member, config.secretaryRoleId);
+}
+
+/**
+ * Whether the interaction's member may submit reports / start games.
+ */
+export function isLeaderOrSecretary(interaction) {
+  return (
+    memberHasRole(interaction.member, config.leaderRoleId) ||
+    memberHasRole(interaction.member, config.secretaryRoleId)
+  );
 }
 
 export function displayNameOf(member, user) {

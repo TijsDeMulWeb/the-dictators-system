@@ -6,16 +6,15 @@ import {
   SlashCommandBuilder,
   UserSelectMenuBuilder,
 } from 'discord.js';
-import { config } from '../config.js';
 import { createDraft } from '../session.js';
+import { isLeaderOrSecretary } from '../lib/members.js';
 
 export const data = new SlashCommandBuilder()
   .setName('new-game')
   .setDescription('Start a new game and create its private channel');
 
 export async function execute(interaction) {
-  const roles = interaction.member?.roles?.cache;
-  if (! (roles?.has(config.leaderRoleId) || roles?.has(config.secretaryRoleId))) {
+  if (! isLeaderOrSecretary(interaction)) {
     await interaction.reply({
       content: '⛔ Only Leaders (or the General Secretary) can start games.',
       flags: MessageFlags.Ephemeral,

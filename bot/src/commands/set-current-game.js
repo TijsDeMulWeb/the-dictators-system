@@ -1,5 +1,6 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
 import { config } from '../config.js';
+import { isSecretary } from '../lib/members.js';
 import { setCurrentGameNumber } from '../api.js';
 
 export const data = new SlashCommandBuilder()
@@ -10,7 +11,7 @@ export const data = new SlashCommandBuilder()
   );
 
 export async function execute(interaction) {
-  if (! interaction.member?.roles?.cache?.has(config.secretaryRoleId)) {
+  if (! isSecretary(interaction)) {
     await interaction.reply({
       content: '⛔ Only the General Secretary can change the game number.',
       flags: MessageFlags.Ephemeral,

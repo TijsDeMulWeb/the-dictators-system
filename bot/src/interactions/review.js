@@ -11,10 +11,7 @@ import { approveReport, getReport, rejectReport } from '../api.js';
 import { renderReportCard } from '../render.js';
 import { officialEmbed, statusEmbedFrom } from '../lib/embeds.js';
 import { fetchImageBuffer } from '../lib/http.js';
-
-function isSecretary(interaction) {
-  return interaction.member?.roles?.cache?.has(config.secretaryRoleId) ?? false;
-}
+import { isSecretary } from '../lib/members.js';
 
 async function denyNonSecretary(interaction) {
   await interaction.reply({

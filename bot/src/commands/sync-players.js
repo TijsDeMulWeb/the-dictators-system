@@ -1,5 +1,6 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
 import { config } from '../config.js';
+import { isSecretary } from '../lib/members.js';
 import { syncGuildPlayers } from '../lib/players.js';
 
 export const data = new SlashCommandBuilder()
@@ -7,7 +8,7 @@ export const data = new SlashCommandBuilder()
   .setDescription('Sync the Discord members into the player list (secretary only)');
 
 export async function execute(interaction) {
-  if (!interaction.member?.roles?.cache?.has(config.secretaryRoleId)) {
+  if (!isSecretary(interaction)) {
     await interaction.reply({
       content: '⛔ Only the General Secretary can sync players.',
       flags: MessageFlags.Ephemeral,
